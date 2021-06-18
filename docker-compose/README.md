@@ -19,7 +19,9 @@ docker-compose_reverse-proxy_1   /entrypoint.sh --api.insec ...   Up      0.0.0.
 --------------------------------------------------------------------------------------------------------------------
 docker-compose_reverse-proxy_1   /entrypoint.sh --api.insec ...   Up      0.0.0.0:80->80/tcp, 0.0.0.0:8080->8080/tcp
 ```
-open: http://0.0.0.0:8080/dashboard/#/
+
+open http://0.0.0.0:8080/dashboard/#/
+
 ---
 
 ### Install service for routing
