@@ -1,3 +1,14 @@
+### Concepts
+- configuration: static and dynamic
+- providers: k8s, docker, file, swarm
+- entrypoint: frontend (ip/port)
+- service: backend
+- routers: rules for mapping
+- middlewares: filters
+
+- traefik starts with static config and dynamic config is polled
+---
+
 ### Dynamic routing
 ```
 example:
