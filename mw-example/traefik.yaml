@@ -1,0 +1,31 @@
+# Entrypoints have to be defined as static configuration in traefik.yml
+entryPoints:
+  web:
+    address: ":80"
+    transport:
+      respondingTimeouts:
+        readTimeout: 30
+        writeTimeout: 30
+        idleTimeout: 30
+    proxyProtocol:
+      insecure: true
+#    http:
+#      redirections:
+#        entryPoint:
+#          to: websecure
+#          scheme: https
+
+  websecure:
+    address: ":443"
+
+providers:
+  file:
+    filename: /etc/traefik/traefik-dynamic.yaml
+    watch: true
+  docker: {}
+
+api:
+  insecure: true
+  dashboard: true
+
+accesslog: {}

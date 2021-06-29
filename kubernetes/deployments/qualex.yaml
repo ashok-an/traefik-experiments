@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qualex-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: devx-qualex
+  template:
+    metadata:
+      labels:
+        run: devx-qualex
+    spec:
+      containers:
+      - image: ashoka007/random-bg-color
+        name: qualex-pod
+        env:
+        - name: HOSTNAME
+          value: qualex-app
+        ports:
+        - containerPort: 5000

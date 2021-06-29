@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ctc-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: devx-ctc
+  template:
+    metadata:
+      labels:
+        run: devx-ctc
+    spec:
+      containers:
+      - image: ashoka007/random-bg-color
+        name: ctc-pod
+        env:
+        - name: HOSTNAME
+          value: ctc-app
+        ports:
+        - containerPort: 5000

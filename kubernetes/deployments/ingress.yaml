@@ -1,0 +1,26 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: devx-ingress
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`ctc.nashok-mac`)
+      kind: Rule
+      services:
+        - name: ctc-dep
+          port: 5000
+    - match: Host(`cerebro.nashok-mac`)
+      kind: Rule
+      services:
+        - name: cerebro-dep
+          port: 5000
+    - match: Host(`qualex.nashok-mac`)
+      kind: Rule
+      services:
+        - name: qualex-dep
+          port: 5000
+

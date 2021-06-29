@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.4
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - ./traefik-dynamic.yaml:/etc/traefik/traefik-dynamic.yaml:ro
+
+  whoami:
+    # A container that exposes an API to show its IP address
+    image: traefik/whoami
+    labels:
+      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
+
+  cerebro:
+    # A container that exposes an API to show its IP address
+    image: ashoka007/random-bg-color
+    environment:
+      - "HOSTNAME=cerebro"
+    deploy:
+      mode: replicated
+      replicas: 3
+    labels:
+      - "traefik.http.routers.cerebro.rule=Host(`cerebro.localhost`)"
+      - "traefik.http.routers.cerebro.middlewares=mw-errorpages"
+  # Error Pages Middleware
+      - "traefik.http.middlewares.mw-errorpages.errors.status=400-599"
+      - "traefik.http.middlewares.mw-errorpages.errors.service=error"
+      - "traefik.http.middlewares.mw-errorpages.errors.query=/{status}.html"
+
+  qualex:
+    # A container that exposes an API to show its IP address
+    image: ashoka007/random-bg-color
+    environment:
+      - "HOSTNAME=qualex"
+    labels:
+      - "traefik.http.routers.qualex.rule=Host(`qualex.localhost`)"
+      - "traefik.http.routers.qualex.middlewares=mw-errorpages,mw-compress,mw-ratelimit,mw-retry,mw-circuitbreaker"
+    # Error Pages Middleware
+      - "traefik.http.middlewares.mw-errorpages.errors.status=400-599"
+      - "traefik.http.middlewares.mw-errorpages.errors.service=error"
+      - "traefik.http.middlewares.mw-errorpages.errors.query=/{status}.html"
+    # Compress
+      - "traefik.http.middlewares.mw-compress.compress=true"
+    # Rate-limit (2 per min)
+      - "traefik.http.middlewares.mw-ratelimit.ratelimit.average=5"
+      - "traefik.http.middlewares.mw-ratelimit.ratelimit.period=1m"
+    # Retry
+      - "traefik.http.middlewares.mw-retry.retry.attempts=4"
+      - "traefik.http.middlewares.mw-retry.retry.initialinterval=2s"
+    # Circuit-breaker (25% of errors are 5XX or 30% network errors or average latency > 100ms)
+      - "traefik.http.middlewares.mw-circuitbreaker.circuitbreaker.expression=LatencyAtQuantileMS(50.0) > 100 || ResponseCodeRatio(500, 600, 0, 600) > 0.25 || NetworkErrorRatio() > 0.30"
+
+  # Error Page service
+  error:
+    image: guillaumebriday/traefik-custom-error-pages
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.error.rule=Host(`error.localhost`)"
+      - "traefik.http.services.error.loadbalancer.server.port=80"
+      - "traefik.http.routers.error.service=error"
+      - "traefik.http.routers.error.entrypoints=web"
+

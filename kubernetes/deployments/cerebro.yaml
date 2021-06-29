@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cerebro-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: devx-cerebro
+  template:
+    metadata:
+      labels:
+        run: devx-cerebro
+    spec:
+      containers:
+      - image: ashoka007/random-bg-color
+        name: cerebro-pod
+        env:
+        - name: HOSTNAME
+          value: cerebro-app
+        ports:
+        - containerPort: 5000
