@@ -29,3 +29,7 @@ api:
   dashboard: true
 
 accesslog: {}
+
+log:
+  level: DEBUG
+

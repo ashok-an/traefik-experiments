@@ -21,7 +21,8 @@ services:
     # A container that exposes an API to show its IP address
     image: traefik/whoami
     labels:
-      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
+      - "traefik.http.routers.whoami.rule=PathPrefix(`/whoami`)"
+      #- "traefik.http.routers.whoami.rule=Host(`ubuntu.devxdemo.civo.com || PathPrefix(`/whoami`)"
 
   cerebro:
     # A container that exposes an API to show its IP address
@@ -30,10 +31,11 @@ services:
       - "HOSTNAME=cerebro"
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 2
     labels:
-      - "traefik.http.routers.cerebro.rule=Host(`cerebro.localhost`)"
-      - "traefik.http.routers.cerebro.middlewares=mw-errorpages"
+      - "traefik.http.routers.cerebro.rule=PathPrefix(`/cerebro`)"
+      - "traefik.http.routers.cerebro.middlewares=mw-errorpages,mw-stripprefix-c"
+      - "traefik.http.middlewares.mw-stripprefix-c.stripprefix.prefixes=/cerebro"
   # Error Pages Middleware
       - "traefik.http.middlewares.mw-errorpages.errors.status=400-599"
       - "traefik.http.middlewares.mw-errorpages.errors.service=error"
@@ -45,16 +47,17 @@ services:
     environment:
       - "HOSTNAME=qualex"
     labels:
-      - "traefik.http.routers.qualex.rule=Host(`qualex.localhost`)"
-      - "traefik.http.routers.qualex.middlewares=mw-errorpages,mw-compress,mw-ratelimit,mw-retry,mw-circuitbreaker"
+      - "traefik.http.routers.qualex.rule=PathPrefix(`/qualex`)"
+      - "traefik.http.routers.qualex.middlewares=mw-errorpages,mw-compress,mw-ratelimit,mw-retry,mw-circuitbreaker,mw-stripprefix-q"
+      - "traefik.http.middlewares.mw-stripprefix-q.stripprefix.prefixes=/qualex"
     # Error Pages Middleware
       - "traefik.http.middlewares.mw-errorpages.errors.status=400-599"
       - "traefik.http.middlewares.mw-errorpages.errors.service=error"
       - "traefik.http.middlewares.mw-errorpages.errors.query=/{status}.html"
     # Compress
       - "traefik.http.middlewares.mw-compress.compress=true"
-    # Rate-limit (2 per min)
-      - "traefik.http.middlewares.mw-ratelimit.ratelimit.average=5"
+    # Rate-limit (10 per min)
+      - "traefik.http.middlewares.mw-ratelimit.ratelimit.average=10"
       - "traefik.http.middlewares.mw-ratelimit.ratelimit.period=1m"
     # Retry
       - "traefik.http.middlewares.mw-retry.retry.attempts=4"
@@ -67,7 +70,7 @@ services:
     image: guillaumebriday/traefik-custom-error-pages
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.error.rule=Host(`error.localhost`)"
+      - "traefik.http.routers.error.rule=Host(`error.ubuntu.devxdemo.civo.com`)"
       - "traefik.http.services.error.loadbalancer.server.port=80"
       - "traefik.http.routers.error.service=error"
       - "traefik.http.routers.error.entrypoints=web"
